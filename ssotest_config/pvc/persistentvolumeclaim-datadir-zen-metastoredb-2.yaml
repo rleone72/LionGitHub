@@ -1,0 +1,18 @@
+﻿kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+    trident.netapp.io/unixPermissions: "777"
+  name: datadir-zen-metastoredb-2
+  namespace: ssotest
+  labels:
+    component: zen-metastoredb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nas-ssd-basic
+  volumeMode: Filesystem
