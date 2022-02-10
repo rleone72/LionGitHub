@@ -1,0 +1,18 @@
+﻿kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  annotations:
+    trident.netapp.io/unixPermissions: "777"
+  name: mongodbdir-icp-mongodb-0
+  namespace: ibm-common-services
+  labels:
+    app: icp-mongodb
+    release: mongodb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: nas-ssd-basic
+  volumeMode: Filesystem
