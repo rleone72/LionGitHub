@@ -1,6 +1,0 @@
-The oauth-client command failed with Error from server (NotFound): secrets "platform-oidc-credentials" not found.
-
-Try logging in again and then run the command again.
-If the command continues to fail, you may not have permission to run this command.
-FAILED
-Set 'CLOUDCTL_TRACE=true' for details
