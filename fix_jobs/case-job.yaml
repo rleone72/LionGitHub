@@ -1,0 +1,226 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    configurationChecksum_CaseInit: 396e98cbbba184158220b49ddb4b7af06b59e32f
+  creationTimestamp: "2021-11-25T14:59:58Z"
+  labels:
+    app.kubernetes.io/component: case-init
+    app.kubernetes.io/instance: icp4adeploy-bawins1
+    app.kubernetes.io/managed-by: Operator
+    app.kubernetes.io/name: workflow-server
+    app.kubernetes.io/version: 21.0.2
+    release: 21.0.2
+  name: icp4adeploy-bawins1-baw-case-init-job
+  namespace: ssotest
+  ownerReferences:
+  - apiVersion: icp4a.ibm.com/v1
+    kind: ICP4ACluster
+    name: icp4adeploy
+    uid: ef2680be-27d0-44eb-9e98-25455d453ba5
+  resourceVersion: "95390767"
+  uid: 0836528a-99ea-4bc7-9d26-cb9c6fd977da
+spec:
+  backoffLimit: 30
+  completions: 1
+  parallelism: 1
+  selector:
+    matchLabels:
+  template:
+    metadata:
+      annotations:
+        cloudpakId: 94a9c8c358bb43ba8fbdea62e7e166a5
+        cloudpakName: IBM Cloud Pak for Business Automation
+        cloudpakVersion: 21.0.2
+        productChargedContainers: ""
+        productCloudpakRatio: "1:1"
+        productID: b592babf10c14f7197f70e198ac2676a
+        productMetric: VIRTUAL_PROCESSOR_CORE
+        productName: Non Chargeable Component - CP4BA
+        productVersion: 21.0.2
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/component: case-init
+        app.kubernetes.io/instance: icp4adeploy-bawins1
+        app.kubernetes.io/managed-by: Operator
+        app.kubernetes.io/name: workflow-server
+        app.kubernetes.io/version: 21.0.2
+        job-name: icp4adeploy-bawins1-baw-case-init-job
+        release: 21.0.2
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - args:
+        - cp /temp/jms-client.xml /opt/ibm/wlp/usr/servers/defaultServer/configDropins/overrides/jms-client.xml
+          && /opt/ibm/icm/case-init-script.sh
+        command:
+        - sh
+        - -c
+        env:
+        - name: CPE_URL
+          value: https://icp4adeploy-cpe-svc:9443/wsi/FNCEWS40MTOM
+        - name: CPE_GATEWAY_URL
+          value: https://icp4adeploy-cpe-svc:9443/WSCPEService/WSCPEServiceSoapService
+        - name: CPE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: appLoginUsername
+              name: ibm-fncm-secret
+        - name: CPE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: appLoginPassword
+              name: ibm-fncm-secret
+        - name: DOS_OBJECTSTORE_NAME
+          value: SUFASStaging
+        - name: TOS_OBJECTSTORE_NAME
+          value: SUFAS
+        - name: DOMAIN_NAME
+          value: P8SSOTest
+        - name: CONN_POINT_NAME
+          value: SUFAS_CP01
+        - name: NAVIGATOR_URL
+          value: https://icp4adeploy-navigator-svc:9443/navigator
+        - name: NAVIGATOR_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: appLoginUsername
+              name: ibm-ban-secret
+        - name: NAVIGATOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: appLoginPassword
+              name: ibm-ban-secret
+        - name: CASEMANAGER_URL
+          value: https://baw-bawins1-ssotest.apps.ccp11-e.atlantica.admin.ch/CaseManager
+        - name: BAW_HOSTNAME
+          value: baw-bawins1-ssotest.apps.ccp11-e.atlantica.admin.ch
+        - name: BAW_PORT
+        - name: BAW_SERVICE_NAME
+          value: icp4adeploy-bawins1-baw-service
+        - name: BAW_SERVICE_PORT
+          value: "9443"
+        - name: ICN_HOSTNAME
+          value: navigator-ssotest.apps.ccp11-e.atlantica.admin.ch
+        - name: ICN_PORT
+        - name: UMS_AUTH_URL
+          value: https://icp4adeploy-ums-sso-service/oidc/endpoint/ums/authorize?response_type=token&client_id=tPcIPpUniuOIerQQeNKe&scope=openid&state=none&redirect_uri=https://navigator-ssotest.apps.ccp11-e.atlantica.admin.ch/oidcclient/redirect/InternalUmsNAV
+        - name: SSL_CA_CERT_PATH
+          value: /shared/resources/cert-trusted/ca.crt
+        - name: IS_SECURE
+          value: T
+        - name: TARGET_ENV_NAME
+          value: target_env
+        - name: ENV_TYPE
+          value: PROD
+        - name: WORKPLACE_URL_EXTERNAL
+          value: https://ae-workspace-ssotest.apps.ccp11-e.atlantica.admin.ch/IBM
+            Automation Workplace(SYSWPA)
+        - name: ADD_OS_ADMINS_IN_DEFAULT_PA
+          value: "true"
+        - name: JMSUserName
+          valueFrom:
+            secretKeyRef:
+              key: adminUsername
+              name: icp4adeploy-bawins1-baw-admin-secret
+        - name: JMSPassword
+          valueFrom:
+            secretKeyRef:
+              key: adminPassword
+              name: icp4adeploy-bawins1-baw-admin-secret
+        - name: JMSTopicConnectionFactoryName
+          value: tw.jms.caseMessageConnectionFactory
+        - name: JMSTopicName
+          value: caseTopic
+        - name: INDEX_NUMBER_OF_SHARDS
+          value: "3"
+        - name: INDEX_NUMBER_OF_REPLICAS
+          value: "1"
+        - name: BAW_CONTEXT_ROOT_PREFIX
+        image: cp.icr.io/cp/cp4a/baw/workflow-server-case-initialization@sha256:6291d36528904a7756ccfc1619c6a29be98af2e7e2db68413c6e7a0e81bb4c72
+        imagePullPolicy: IfNotPresent
+        name: case-init-job
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 200m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /shared/resources/cert-trusted
+          name: trust-tls-volume
+        - mountPath: /opt/ibm/icm/shared
+          name: network-shared-directory
+        - mountPath: /opt/ibm/icm/shared/configDropins/overrides
+          name: icn-config-overrides
+        - mountPath: /opt/ibm/wlp/usr/servers/defaultServer/configDropins/overrides
+          name: cpe-config-overrides
+        - mountPath: /temp/jms-client.xml
+          name: volume-secret-case
+          subPath: jms-client.xml
+        - mountPath: /logs/application
+          name: logs
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: icp4adeploy-bawins1-baw-server-sa
+      serviceAccountName: icp4adeploy-bawins1-baw-server-sa
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: trust-tls-volume
+        projected:
+          defaultMode: 511
+          sources:
+          - secret:
+              items:
+              - key: tls.crt
+                path: ca.crt
+              name: icp4a-root-ca
+      - name: network-shared-directory
+        persistentVolumeClaim:
+          claimName: icn-pluginstore
+      - name: icn-config-overrides
+        persistentVolumeClaim:
+          claimName: icn-cfgstore
+      - name: cpe-config-overrides
+        persistentVolumeClaim:
+          claimName: cpe-cfgstore
+      - name: volume-secret-case
+        secret:
+          defaultMode: 420
+          items:
+          - key: jms-client.xml
+            path: jms-client.xml
+          secretName: icp4adeploy-bawins1-baw-server-secret-case
+      - name: logs
+        persistentVolumeClaim:
+          claimName: icp4adeploy-bawins1-baw-logs-storage-pvc
+status:
+  completionTime: "2021-11-25T15:33:10Z"
+  conditions:
+  - lastProbeTime: "2021-11-25T15:33:10Z"
+    lastTransitionTime: "2021-11-25T15:33:10Z"
+    status: "True"
+    type: Complete
+  startTime: "2021-11-25T14:59:58Z"
+  succeeded: 1
