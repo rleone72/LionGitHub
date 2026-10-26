@@ -1,0 +1,136 @@
+# =============================================================================
+# values.yaml – IBM Content Cortex (FileNet) – Secrets & Verbindungen
+# -----------------------------------------------------------------------------
+# Repository : adms-fn-config
+# Pfad       : eg1/<chart-ordner>/values.yaml
+# Deployment : ArgoCD (GitOps)
+#
+# Hinweise:
+# - Secrets werden NICHT im Repo gespeichert. Sie werden via External
+#   Secrets Operator (ESO) aus HashiCorp Vault in den Namespace synchronisiert.
+# - Die Secrets müssen vor dem Deployment der FileNet CR im Namespace
+#   vorhanden sein (ggf. via ArgoCD Sync-Wave sicherstellen).
+# - LDAP- und Datenbank-Verbindungen sind pro Umgebung definiert.
+#   Die aktive Umgebung wird über "environment" gewählt.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Aktive Umgebung
+# -----------------------------------------------------------------------------
+# Wählt die Verbindungsdaten aus den Blöcken "ldap" und "database".
+# Erlaubte Werte: eg1 | eg2 | int | abn | prd
+# -----------------------------------------------------------------------------
+environment: eg1
+
+# -----------------------------------------------------------------------------
+# Ziel-Namespace
+# -----------------------------------------------------------------------------
+namespace: adms-app-eg1
+
+# =============================================================================
+# Vault / SecretStore
+# -----------------------------------------------------------------------------
+# Verbindung des External Secrets Operators zu HashiCorp Vault.
+#   server          : URL des Vault-Servers
+#   path            : KV Secret Engine Mount
+#   version         : KV Engine Version (v1 / v2)
+#   mountPath       : Kubernetes Auth Mount in Vault
+#   role            : Vault-Role für die Kubernetes-Authentifizierung
+#   refreshInterval : Intervall, in dem ESO die Secrets aus Vault aktualisiert
+# =============================================================================
+vault:
+  server: "https://vault.tcsb.admin.ch:8200"
+  path: "secret"
+  version: "v2"
+  mountPath: "kubernetes-eng"
+  role: "eng-application-adms-app-eg1"
+  refreshInterval: "1h"
+
+# =============================================================================
+# External Secrets
+# -----------------------------------------------------------------------------
+# Secrets, die aus dem Vault-Pfad in den Namespace synchronisiert werden.
+#   vaultPath   : Pfad in Vault (relativ zum KV Mount)
+#   secretNames : Liste der zu erstellenden Kubernetes Secrets
+# =============================================================================
+externalSecrets:
+  vaultPath: "ocp-clusters/eng/applications/adms-app/eg1/fncm"
+  secretNames:
+    - ibm-ban-secret            # IBM Content Navigator (ICN/BAN) – Credentials
+    - ibm-fncm-secret           # Content Platform Engine (CPE) – Credentials (DB, Admin)
+    - ldap-bind-secret          # LDAP Bind-User
+    - ldap-ssl-secret           # LDAP SSL-Zertifikat (LDAPS)
+    - seco-ca-root-ssl-secret   # SECO Root-CA-Zertifikat
+    - seco-ca-tls-secret        # SECO TLS-Zertifikat
+
+# =============================================================================
+# LDAP / Verzeichnisdienst (AD LDS)
+# -----------------------------------------------------------------------------
+# Verbindung zum LDAP-Server für Authentifizierung und Benutzer-/Gruppensuche.
+#   host : FQDN des LDAP-Servers
+#   port : 50100 = LDAPS (verschlüsselt), 50000 = LDAP (unverschlüsselt)
+#          (AD-LDS-Instanzports, keine LDAP-Standardports 636/389)
+# Zertifikat : ldap-ssl-secret
+# Credentials: ldap-bind-secret
+# =============================================================================
+ldap:
+
+  # EG1 – Entwicklung 1
+  eg1:
+    host: "L91GXAL1.tcsb.admin.ch"
+    port: 50100
+
+  # EG2 – Entwicklung 2
+  eg2:
+    host: "L91GXAL1.tcsb.admin.ch"
+    port: 50100
+
+  # INT – Integration
+  int:
+    host: "<ldap-host-int>.admin.ch"
+    port: "<port-int>"
+
+  # ABN – Abnahme
+  abn:
+    host: "<ldap-host-abn>.admin.ch"
+    port: "<port-abn>"
+
+  # PRD – Produktion
+  prd:
+    host: "<ldap-host-prd>.admin.ch"
+    port: "<port-prd>"
+
+# =============================================================================
+# Datenbank (DB2)
+# -----------------------------------------------------------------------------
+# Verbindung zur DB2-Instanz für GCD, Object Stores und ICN.
+#   host : Service-Name oder FQDN der DB2-Instanz
+#   port : Port der DB2-Instanz (Standard 50000)
+# Credentials : ibm-fncm-secret / ibm-ban-secret
+# =============================================================================
+database:
+
+  # EG1 – Entwicklung 1
+  eg1:
+    host: "c-db2u-eg1-adms-db2u.adms-db-eg1.svc.cluster.local"
+    port: 50000
+
+  # EG2 – Entwicklung 2
+  eg2:
+    host: "c-db2u-eg1a-adms-db2u.adms-db-eg1.svc.cluster.local"
+    port: 50000
+
+  # INT – Integration
+  int:
+    host: "<db2-host-int>"
+    port: 50000
+
+  # ABN – Abnahme
+  abn:
+    host: "<db2-host-abn>"
+    port: 50000
+
+  # PRD – Produktion
+  prd:
+    host: "<db2-host-prd>"
+    port: 50000

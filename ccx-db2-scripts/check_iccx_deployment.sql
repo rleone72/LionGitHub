@@ -5,6 +5,7 @@ db2 "SELECT TABSCHEMA, TBSPACE, COUNT(*) AS TABELLEN
  GROUP BY TABSCHEMA, TBSPACE
  ORDER BY TABSCHEMA, TBSPACE;"
 
+
 -- Tabellen, die nicht in den TS_*-Tablespaces liegen (sollte leer sein) 
 db2 "SELECT TABSCHEMA, TABNAME, TBSPACE \
   FROM SYSCAT.TABLES \
