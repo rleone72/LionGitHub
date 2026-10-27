@@ -1,0 +1,40 @@
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/AvamPropertiesServlet
+          subPath: api-custom-AvamProperties/logs
+
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/DocUploadService
+          subPath: api-custom-DocUploadService/logs
+        - name: shared-pvc-volume
+          mountPath: /app/config
+          subPath: api-custom-DocUploadService/config
+
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/DocEditServlet
+          subPath: api-custom-DocEditServlet/logs
+        - name: shared-pvc-volume
+          mountPath: /tmp/docedit
+          subPath: api-custom-DocEditServlet/temp$
+
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/DossierUpdateService
+          subPath: api-custom-DossierUpdateService/logs
+
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/FnEventLog
+          subPath: api-custom-FnEventLog/logs
+
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/DmsInt
+          subPath: api-custom-DmsInt/logs
+
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /app/output
+          subPath: api-dossier-print-service/output

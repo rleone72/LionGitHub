@@ -1,0 +1,226 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-avamdms-avampropertiesservletear
+data:
+  AVAM_WEBSERVICE_URL: Dummy
+  CACHE_REFRESH_INITIAL_DELAY_MS: "10000"
+  CACHE_REFRESH_INTERVAL_MIN: "1440"
+  CACHE_REFRESH_START_TIME: "04:05"
+  CONFIG_DIR: /config
+  LOG_CONFIG_FILE: logback.xml
+  LOG_DEBUG: "true"
+  TRUSTSTORE_PATH: ./misc/.keystore
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avamdms-aps-liberty-dev
+  namespace: avam-dms-fncm-d-01
+  labels:
+    app: avamdms-aps-liberty-dev
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: avamdms-aps-liberty-dev
+  template:
+    metadata:
+      labels:
+        app: avamdms-aps-liberty-dev
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9443"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      initContainers:
+      - name: init-folder-preparation
+        image: registry.redhat.io/ubi9/ubi-minimal:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Erstelle Verzeichnisstruktur auf PVC..."
+          mkdir -p /mnt/pvc/api-custom-DossierUpdateService/logs/archived \
+                   /mnt/pvc/api-custom-DocUploadService/logs/archived \
+                   /mnt/pvc/api-custom-DocUploadService/config \
+                   /mnt/pvc/api-custom-AvamProperties/logs/archived \
+                   /mnt/pvc/api-custom-DocEditServlet/logs/archived \
+                   /mnt/pvc/api-custom-DocEditServlet/temp \
+                   /mnt/pvc/api-custom-FnEventLog/logs/archived \
+                   /mnt/pvc/api-custom-DmsInt/logs/archived \
+                   /mnt/pvc/api-dossier-print-service/temp
+          echo "Verzeichnisstruktur erfolgreich initialisiert."
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /mnt/pvc
+      containers:
+      - name: avamdms-aps-liberty-dev
+        image: avamreg.azurecr.io/avampropertiesservlet:1.0.1
+        ports:
+        - containerPort: 9080
+          name: http
+          protocol: TCP
+        - containerPort: 9443
+          name: https
+          protocol: TCP
+        - containerPort: 9082
+          name: http-alt
+        - containerPort: 9445
+          name: https-alt
+        env:
+        # AVAM credentials from Secret
+        #- name: AVAM_WEBSERVICE_URL # from cm
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: secret-avamdms-avampropertiesservletear
+        #      key: url
+        #- name: AVAM_WEBSERVICE_USERNAME
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: secret-avamdms-avampropertiesservletear
+        #      key: username
+        #- name: AVAM_WEBSERVICE_PASSWORD
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: secret-avamdms-avampropertiesservletear
+        #      key: password
+        
+        # Configuration from ConfigMap
+        - name: HTTP_PORT
+          value: "9082"
+        - name: HTTPS_PORT
+          value: "9445"
+        envFrom:
+        - configMapRef:
+            name: cm-avamdms-avampropertiesservletear
+        - secretRef:
+            name: secret-avamdms-avampropertiesservletear
+        
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "300m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        
+        # Health probes
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9082
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9082
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # Startup probe (for slow-starting applications)
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 9082
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 12
+        imagePullPolicy: IfNotPresent
+        
+        # Volume mounts
+        volumeMounts:
+        - name: shared-pvc-volume
+          mountPath: /var/log/AvamPropertiesServlet
+          subPath: api-custom-AvamProperties/logs
+        #- name: jvm-options
+        #  mountPath: /config/jvm.options
+        #  subPath: jvm.options
+        #  readOnly: true
+        # Uncomment if using Kubernetes Secret for keystore
+        # - name: keystore
+        #   mountPath: /opt/ibm/wlp/output/defaultServer/resources/security
+        #   readOnly: true
+        
+        # Security context
+        #securityContext:
+        #  allowPrivilegeEscalation: false
+        #  runAsNonRoot: true
+        #  runAsUser: 1001
+        #  capabilities:
+        #    drop:
+        #    - ALL
+        #  readOnlyRootFilesystem: false
+      
+      volumes:
+      - name: shared-pvc-volume
+        persistentVolumeClaim:
+          claimName: pvc-api-custom-services-logs
+      #  emptyDir: {}
+      #- name: jvm-options
+      #  configMap:
+      #    name: cm-avamdms-jvmoptions
+      #    items:
+      #    - key: jvm.options
+      #      path: jvm.options
+      # Uncomment if using Kubernetes Secret for keystore
+      # - name: keystore
+      #   secret:
+      #     secretName: liberty-keystore
+      
+      # Image pull secrets (if using private registry)
+      # imagePullSecrets:
+      # - name: acr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avamdms-aps-liberty-dev
+  namespace: avam-dms-fncm-d-01
+  labels:
+    app: avamdms-aps-liberty-dev
+spec:
+  type: ClusterIP
+  selector:
+    app: avamdms-aps-liberty-dev
+  ports:
+  - name: http
+    port: 9080
+    targetPort: 9080
+    protocol: TCP
+  - name: https
+    port: 9443
+    targetPort: 9443
+    protocol: TCP
+  - name: http-alt
+    port: 9082
+    targetPort: 9082
+    protocol: TCP
+  - name: https-alt
+    port: 9445
+    targetPort: 9445
+    protocol: TCP
