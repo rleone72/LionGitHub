@@ -87,18 +87,38 @@ ldap:
 
   # INT – Integration
   int:
-    host: "<ldap-host-int>.admin.ch"
-    port: "<port-int>"
+    host: "L91GAAL1.admin.ch"
+    port: 50110
+
+  # FTS – Fachtest
+  fts:
+    host: "L91GAAL1.admin.ch"
+    port: 50111
+
+  # ITU – Integration & Test
+  itu:
+    host: "L91GAAL1.admin.ch"
+    port: 50112
 
   # ABN – Abnahme
   abn:
-    host: "<ldap-host-abn>.admin.ch"
-    port: "<port-abn>"
+    host: "L91GAAL1.admin.ch"
+    port: 50113
+
+  # HF – Hotfix
+  hf:
+    host: "L91GPAL1.admin.ch"
+    port: 50120
+
+  # SCH – Schulung
+  sch:
+    host: "L91GPAL1.admin.ch"
+    port: 50121
 
   # PRD – Produktion
   prd:
-    host: "<ldap-host-prd>.admin.ch"
-    port: "<port-prd>"
+    host: "L91GPAL1.admin.ch"
+    port: 50122
 
 # =============================================================================
 # Datenbank (DB2)
@@ -125,9 +145,29 @@ database:
     host: "<db2-host-int>"
     port: 50000
 
+  # FTS – Fachtest
+  fts:
+    host: "<db2-host-fts>"
+    port: 50000
+
+  # ITU – Integration & Test
+  itu:
+    host: "<db2-host-itu>"
+    port: 50000
+
   # ABN – Abnahme
   abn:
     host: "<db2-host-abn>"
+    port: 50000
+
+  # HF – Hotfix
+  hf:
+    host: "<db2-host-hf>"
+    port: 50000
+
+  # SCH – Schulung
+  sch:
+    host: "<db2-host-sch>"
     port: 50000
 
   # PRD – Produktion
