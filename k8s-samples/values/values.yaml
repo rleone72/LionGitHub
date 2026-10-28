@@ -2,7 +2,7 @@
 # values.yaml – IBM Content Cortex (FileNet) – Secrets & Verbindungen
 # -----------------------------------------------------------------------------
 # Repository : adms-fn-config
-# Pfad       : eg1/<chart-ordner>/values.yaml
+# Pfad       : int/<chart-ordner>/values.yaml
 # Deployment : ArgoCD (GitOps)
 #
 # Hinweise:
@@ -18,14 +18,14 @@
 # Aktive Umgebung
 # -----------------------------------------------------------------------------
 # Wählt die Verbindungsdaten aus den Blöcken "ldap" und "database".
-# Erlaubte Werte: eg1 | eg2 | int | abn | prd
+# Erlaubte Werte: eg1 | eg2 | int | fts | itu | abn | hf | sch | prd
 # -----------------------------------------------------------------------------
-environment: eg1
+environment: int
 
 # -----------------------------------------------------------------------------
 # Ziel-Namespace
 # -----------------------------------------------------------------------------
-namespace: adms-app-eg1
+namespace: adms-app-int
 
 # =============================================================================
 # Vault / SecretStore
@@ -42,8 +42,8 @@ vault:
   server: "https://vault.tcsb.admin.ch:8200"
   path: "secret"
   version: "v2"
-  mountPath: "kubernetes-eng"
-  role: "eng-application-adms-app-eg1"
+  mountPath: "kubernetes-int"
+  role: "int-application-adms-app-int"
   refreshInterval: "1h"
 
 # =============================================================================
@@ -54,7 +54,7 @@ vault:
 #   secretNames : Liste der zu erstellenden Kubernetes Secrets
 # =============================================================================
 externalSecrets:
-  vaultPath: "ocp-clusters/eng/applications/adms-app/eg1/fncm"
+  vaultPath: "ocp-clusters/npd/applications/adms-app/int/fncm/"
   secretNames:
     - ibm-ban-secret            # IBM Content Navigator (ICN/BAN) – Credentials
     - ibm-fncm-secret           # Content Platform Engine (CPE) – Credentials (DB, Admin)
@@ -133,44 +133,137 @@ database:
   # EG1 – Entwicklung 1
   eg1:
     host: "c-db2u-eg1-adms-db2u.adms-db-eg1.svc.cluster.local"
+    name: "admseg1"
     port: 50000
 
   # EG2 – Entwicklung 2
   eg2:
     host: "c-db2u-eg1a-adms-db2u.adms-db-eg1.svc.cluster.local"
+    name: "admseg1"
     port: 50000
 
   # INT – Integration
   int:
     host: "<db2-host-int>"
+    name: "<database-name-int>"
     port: 50000
 
   # FTS – Fachtest
   fts:
     host: "<db2-host-fts>"
+    name: "<database-name-fts>"
     port: 50000
 
   # ITU – Integration & Test
   itu:
     host: "<db2-host-itu>"
+    name: "<database-name-itu>"
     port: 50000
 
   # ABN – Abnahme
   abn:
     host: "<db2-host-abn>"
+    name: "<database-name-abn>"
     port: 50000
 
   # HF – Hotfix
   hf:
     host: "<db2-host-hf>"
+    name: "<database-name-hf>"
     port: 50000
 
   # SCH – Schulung
   sch:
     host: "<db2-host-sch>"
+    name: "<database-name-sch>"
     port: 50000
 
   # PRD – Produktion
   prd:
     host: "<db2-host-prd>"
+    name: "<database-name-ped>"
     port: 50000
+    
+# =============================================================================
+# FileNet Contant Platform Engine
+# -----------------------------------------------------------------------------
+# Verbindung zu DB2-Schema für GCD, Object Stores und ICN.
+#    gcd_schema: <gcd-schema-name>
+#    icn_schema: <icn-schema-name>
+#    oc_cpe_obj_store_schema_name: <os-schema-name>
+#    oc_cpe_obj_store_schema_name: <os-schema-name>
+#    oc_cpe_obj_store_schema_name: <os-schema-name>
+# =============================================================================
+filenet:
+
+  # EG1 – Entwicklung 1
+  eg1:
+    gcd_schema: svcfndb2gcdeg1
+    icn_schema: svcfndb2icneg1
+    person_schema: "svcfndb2personeg1"
+    unternehmen_schema: "svcfndb2unternehmeneg1"
+    logistik_schema: "svcfndb2logistikeg1"
+
+  # EG2 – Entwicklung 2
+  eg2:
+    gcd_schema: svcfndb2gcdeg1
+    icn_schema: svcfndb2icneg1
+    person_schema: "svcfndb2personeg1"
+    unternehmen_schema: "svcfndb2unternehmeneg1"
+    logistik_schema: "svcfndb2logistikeg1"
+  
+  # INT – Integration
+  int:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>
+
+  # FTS – Fachtest
+  fts:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>
+
+  # ITU – Integration & Test
+  itu:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>
+
+  # ABN – Abnahme
+  abn:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>
+
+  # HF – Hotfix
+  hf:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>
+
+  # SCH – Schulung
+  sch:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>
+
+  # PRD – Produktion
+  prd:
+    gcd_schema: <gcd-schema-name>
+    icn_schema: <icn-schema-name>
+    person_schema: <os-schema-name>
+    unternehmen_schema: <os-schema-name>
+    logistik_schema: <os-schema-name>

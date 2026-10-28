@@ -592,7 +592,7 @@ spec:
       ## Provide the database server name or IP address of the database server, not applicable to Oracle which requires a JDBC URL.  If using an IPv6 literal, enclose it in square brackets [].
       database_servername: {{ (index .Values.database .Values.environment).host | quote }}
       ## Provide the name of the database for the GCD for CPE.  For example: "GCDDB"
-      database_name: "admseg1"
+      database_name: {{ (index .Values.database .Values.environment).name | quote }}
       ## Provide the database server port.  For Db2, the default is "50000". Not applicable to Oracle which requires a JDBC URL.
       database_port: {{ (index .Values.database .Values.environment).port | quote }}
       ## The name of the secret that contains the DB2/Oracle/PostgreSQL/SQLServer SSL certificate.
@@ -653,7 +653,7 @@ spec:
       ## GCD configuration above.  If using an IPv6 literal, enclose it in square brackets [].
       database_servername: {{ (index .Values.database .Values.environment).host | quote }}
       ## Provide the name of the database for the GCD for CPE.  For example: "GCDDB"
-      database_name: "admseg1"
+      database_name: {{ (index .Values.database .Values.environment).name | quote }}
       ## Provide the database server port.  For Db2, the default is "50000". Not applicable to Oracle which requires a JDBC URL.
       database_port: {{ (index .Values.database .Values.environment).port | quote }}
       ## The name of the secret that contains the DB2/Oracle/PostgreSQL/SQLServer SSL certificate.
@@ -710,7 +710,7 @@ spec:
       ## GCD configuration above.  If using an IPv6 literal, enclose it in square brackets [].
       database_servername: {{ (index .Values.database .Values.environment).host | quote }}
       ## Provide the name of the database for the GCD for CPE.  For example: "GCDDB"
-      database_name: "admseg1"
+      database_name: {{ (index .Values.database .Values.environment).name | quote }}
       ## Provide the database server port.  For Db2, the default is "50000". Not applicable to Oracle which requires a JDBC URL.
       database_port: {{ (index .Values.database .Values.environment).port | quote }}
       ## The name of the secret that contains the DB2/Oracle/PostgreSQL/SQLServer SSL certificate.
@@ -767,7 +767,7 @@ spec:
       ## GCD configuration above.  If using an IPv6 literal, enclose it in square brackets [].
       database_servername: {{ (index .Values.database .Values.environment).host | quote }}
       ## Provide the name of the database for the object store 1 for CPE.  For example: "OS1DB"
-      database_name: "admseg1"
+      database_name: {{ (index .Values.database .Values.environment).name | quote }}
       ## Provide the database server port.  For Db2, the default is "50000". Not applicable to Oracle which requires a JDBC URL.
       database_port: {{ (index .Values.database .Values.environment).port | quote }}
       ## The name of the secret that contains the DB2/Oracle/PostgreSQL/SQLServer SSL certificate.
@@ -815,7 +815,7 @@ spec:
       ## Provide the database server port.  For Db2, the default is "50000". Not applicable to Oracle which requires a JDBC URL.
       database_port: {{ (index .Values.database .Values.environment).port | quote }}
       ## Provide the name of the database for ICN (Navigator).  For example: "ICNDB"
-      database_name: "admseg1"
+      database_name: {{ (index .Values.database .Values.environment).name | quote }}
       ## The name of the secret that contains the DB2/Oracle/PostgreSQL/SQLServer SSL certificate.
       # database_ssl_secret_name: "<Required>"
       ## If the database type is Oracle, provide the Oracle DB connection string.
@@ -1061,7 +1061,7 @@ spec:
         gcd_jndixa_name: FNGCDDSXA
 
         ## GCD schema name
-        gcd_schema: svcfndb2gcdeg1
+        gcd_schema: {{ (index .Values.filenet .Values.environment).gcd_schema | quote }}
 
         # The license must be set to "accept" in order for the component to install.  This is the default value.
         license: accept
@@ -1471,7 +1471,7 @@ spec:
       jvm_customize_options: "-DFileNet.WSI.AutoDetectLTPAToken=true,-Dcom.filenet.authentication.displayLdapLoginControls=true,-Xgcpolicy:gencon"
 
       icn_jndids_name: ECMClientDS
-      icn_schema: svcfndb2icneg1
+      icn_schema: {{ (index .Values.filenet .Values.environment).icn_schema | quote }}
       icn_table_space: TS_ICN_DAT
       allow_remote_plugins_via_http: false
       ## uncomment copy_files_to_war parameter to copy customized files into Navigator web application.
@@ -1757,7 +1757,7 @@ spec:
       object_stores:
         - oc_cpe_obj_store_display_name: "Person_Personne_Persona" # Required display name of the object store, for example, "OS01"
           oc_cpe_obj_store_symb_name: "Person"  # Required symbolic name of the object store, for example, "OS01"
-          oc_cpe_obj_store_schema_name: "svcfndb2personeg1" # Optional schema name of the object store, for example, "os01". If omitted, database default schema used at runtime.
+          oc_cpe_obj_store_schema_name: {{ (index .Values.filenet .Values.environment).person_schema | quote }} # Optional schema name of the object store, for example, "os01". If omitted, database default schema used at runtime.
           oc_cpe_obj_store_conn:
             name: "FNPERSDS"
             site_name: "InitialSite"
@@ -1822,7 +1822,7 @@ spec:
         - oc_cpe_obj_store_display_name: "Unternehmen_Entreprise_Impresa"
           ## Symbolic name for the document object store to create
           oc_cpe_obj_store_symb_name: "Unternehmen"
-          oc_cpe_obj_store_schema_name: "svcfndb2unternehmeneg1" # Optional schema name of the object store, for example, "os01". If omitted, database default schema used at runtime.        
+          oc_cpe_obj_store_schema_name: {{ (index .Values.filenet .Values.environment).unternehmen_schema | quote }} # Optional schema name of the object store, for example, "os01". If omitted, database default schema used at runtime.        
           oc_cpe_obj_store_conn:
             ## Object store connection name
             name: "FNUNTEDS"
@@ -1893,7 +1893,7 @@ spec:
         - oc_cpe_obj_store_display_name: "LOGISTIK-LOGISTIQUE-LOGISTICA"
           ## Symbolic name for the document object store to create
           oc_cpe_obj_store_symb_name: "LOGISTIK"
-          oc_cpe_obj_store_schema_name: "svcfndb2logistikeg1" # Optional schema name of the object store, for example, "os01". If omitted, database default schema used at runtime.
+          oc_cpe_obj_store_schema_name: {{ (index .Values.filenet .Values.environment).logistik_schema | quote }} # Optional schema name of the object store, for example, "os01". If omitted, database default schema used at runtime.
           oc_cpe_obj_store_conn:
             ## Object store connection name
             name: "FNLOGIDS"
