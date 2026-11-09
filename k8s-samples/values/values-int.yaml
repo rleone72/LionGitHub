@@ -42,8 +42,8 @@ vault:
   server: "https://vault.tcsb.admin.ch:8200"
   path: "secret"
   version: "v2"
-  mountPath: "kubernetes-int"
-  role: "int-application-adms-app-int"
+  mountPath: "kubernetes-npd"
+  role: "npd-application-adms-app-int"
   refreshInterval: "1h"
 
 # =============================================================================

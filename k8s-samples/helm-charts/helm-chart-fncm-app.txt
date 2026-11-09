@@ -1,0 +1,73 @@
+https://gitrepo.alv.admin.ch/avam/platform/gitops/spoke-cluster-setup/-/tree/main/npd?ref_type=heads
+
+Weil die CRD unter crds/ liegt, reicht helm show crds. Ein helm template --show-only brauchst du nicht.
+
+1. CRD extrahieren
+helm repo add ibm-content https://ibm-ecm.github.io/ibm-content-cortex-containers/charts
+helm repo update
+helm show crds ibm-content/ibm-content-operator --version 26.0.1 > fncmclusters.fncm.ibm.com.yaml
+
+2. Struktur im GitLab-Repo
+fncm-crds/
+├── Chart.yaml
+├── values.yaml          # leer
+└── templates/
+    └── fncmclusters.fncm.ibm.com.yaml
+
+
+Im eigenen Chart legst du die CRD unter templates/ ab und nicht unter crds/. Helm aktualisiert CRDs aus crds/ bei einem helm upgrade nicht. Unter templates/ wird die CRD bei jedem Release sauber mitaktualisiert.
+
+Chart.yaml
+
+apiVersion: v2
+name: fncm-crds
+version: 26.0.1
+appVersion: "26.0.1"
+
+3. GitLab-CI pro neuem Release
+variables:
+  OPERATOR_VERSION: "26.0.1"
+
+update-crd:
+  image: alpine/helm:latest
+  before_script:
+    - apk add --no-cache yq curl
+  script:
+    - helm repo add ibm-content https://ibm-ecm.github.io/ibm-content-cortex-containers/charts
+    - helm show crds ibm-content/ibm-content-operator --version $OPERATOR_VERSION > fncm-crds/templates/fncmclusters.fncm.ibm.com.yaml
+    # Schutz: CRD bei Uninstall nicht löschen
+    - yq -i '.metadata.annotations."helm.sh/resource-policy" = "keep"' fncm-crds/templates/fncmclusters.fncm.ibm.com.yaml
+    - yq -i ".version = \"$OPERATOR_VERSION\" | .appVersion = \"$OPERATOR_VERSION\"" fncm-crds/Chart.yaml
+    - helm lint fncm-crds
+    - helm package fncm-crds
+    - 'curl --fail --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@fncm-crds-${OPERATOR_VERSION}.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"'
+  when: manual
+
+
+Bei einem neuen Release setzt du OPERATOR_VERSION und startest den Job.
+
+4. Deployment
+
+Hub (mit CRD-Rechten):
+
+source:
+  repoURL: https://<gitlab>/api/v4/projects/<id>/packages/helm/stable
+  chart: fncm-crds
+  targetRevision: 26.0.1
+syncPolicy:
+  syncOptions:
+    - ServerSideApply=true
+
+
+Projekt-Application (Operator):
+
+source:
+  helm:
+    skipCrds: true
+
+
+ServerSideApply=true brauchst du, weil grosse CRDs beim normalen Apply sonst am Grössenlimit der Annotation last-applied-configuration scheitern.
+
+Reihenfolge bei jedem neuen Release: Zuerst den CI-Job laufen lassen, dann auf dem Hub targetRevision hochziehen und die CRD ausrollen, erst danach die Operator-Version in der Projekt-Application anheben.
+
+Einfachere Alternative: Wenn du kein Helm-Packaging brauchst, kann der CI-Job die extrahierte YAML auch nur in einen Git-Ordner committen, zum Beispiel crds/26.0.1/. Die Hub-ArgoCD synchronisiert dann diesen Ordner als normale Directory-Source.
